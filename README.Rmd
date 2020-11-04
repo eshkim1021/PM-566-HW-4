@@ -5,8 +5,15 @@ date: "10/24/2020"
 output: github_document
 ---
 
-## Problem 1
+```{r, message = FALSE}
+library(parallel)
+library(tidyverse)
+library(microbenchmark)
+```
 
+## Problem 1: Make Sure Your Code is Nice 
+
+```{r}
 # Total row sums
 fun1 <- function(mat) {
   n <- nrow(mat)
@@ -18,26 +25,26 @@ fun1 <- function(mat) {
 }
 
 fun1alt <- function(mat) {
-  # YOUR CODE HERE
+  rowSums(mat)
 }
 
-# Cumulative product by row
+# Cumulative sum by row
 fun2 <- function(mat) {
   n <- nrow(mat)
-  K <- ncol(mat)
+  k <- ncol(mat)
   ans <- mat
   for (i in 1:n) {
-    for (j in 2:k)
-      ans[i,j] <- mat[i, k] + ans[i, k - 1]
+    for (j in 2:k) {
+      ans[i,j] <- mat[i, j] + ans[i, j - 1]
     }
   }
   ans
 }
 
-fun2alt <- function(mat) {
-  # YOUR CODE HERE
-}
 
+fun2alt <- function(mat) {
+  t(apply(dat,1,cumsum))
+}
 
 # Use the data with this code
 set.seed(2315)
@@ -46,11 +53,37 @@ dat <- matrix(rnorm(200 * 100), nrow = 200)
 # Test for the first
 microbenchmark::microbenchmark(
   fun1(dat),
-  fun1alt(dat), unit = “relative”, check = “equivalent”
-)
+  fun1alt(dat), unit = "relative", check = "equivalent")
 
 # Test for the second
 microbenchmark::microbenchmark(
   fun2(dat),
-  fun2alt(dat), unit = “relative”, check = “equivalent”
+  fun2alt(dat), unit = "relative", check = "equivalent"
 )
+
+```
+
+After fun1 was altered to be more efficient, it was determined that the alternate fun1alt was overall faster in processing than the original function. On average, the fun1alt function was around 5.6941 times faster than the original fun1 function. 
+
+After fun2 was altered to be more efficient, it was determined that the alternate fun2alt was overall faster in processing than the origina function. On average, the fun2alt function was around 3.296 times faster than the original fun2 function. 
+
+
+```{r}
+sim_pi <- function(n = 1000, i = NULL) {
+  p <- matrix(runif(n*2), ncol = 2)
+  mean(rowSums(p^2) < 1) * 4
+}
+
+# Here is an example of the run
+set.seed(156)
+sim_pi(1000) # 3.132
+
+# This runs the simulation a 4,000 times, each with 10,000 points
+set.seed(1231)
+system.time({
+  ans <- unlist(lapply(1:4000, sim_pi, n = 10000))
+  print(mean(ans))
+})
+````
+
+
