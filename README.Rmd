@@ -11,6 +11,8 @@ library(tidyverse)
 library(microbenchmark)
 ```
 
+# HPC 
+
 ## Problem 1: Make Sure Your Code is Nice 
 
 ```{r}
@@ -84,6 +86,80 @@ system.time({
   ans <- unlist(lapply(1:4000, sim_pi, n = 10000))
   print(mean(ans))
 })
-````
+```
+
+# SQL
+
+```{r}
+# install.packages(c("RSQLite", "DBI"))
+
+library(RSQLite)
+library(DBI)
+
+# Initialize a temporary in memory database
+con <- dbConnect(SQLite(), ":memory:")
+
+# Download tables
+film <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/film.csv")
+film_category <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/film_category.csv")
+category <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/category.csv")
+
+# Copy data.frames to database
+dbWriteTable(con, "film", film)
+dbWriteTable(con, "film_category", film_category)
+dbWriteTable(con, "category", category)
 
 
+```
+
+```{sql, connection=con}
+PRAGMA table_info(film)
+```
+
+```{sql, connection=con}
+PRAGMA table_info(film_category)
+```
+```{sql, connection=con}
+PRAGMA table_info(category)
+```
+
+## Question 1: How many movies is there available in each rating category?
+
+```{sql, connection=con}
+SELECT rating,
+COUNT(*) AS count
+FROM film
+GROUP BY rating
+```
+
+## Question 2: What is the average replacement cost and rental rate for each rating category? 
+
+```{sql, connection = con}
+SELECT rating,
+  AVG(replacement_cost) AS avg_replacement_cost,
+  AVG(rental_rate) AS avg_rental_rate
+FROM film 
+GROUP BY rating
+```
+
+## Question 3: Use table film_category together with film to find how many films there are with each category ID
+
+```{sql, connection = con}
+SELECT c.category_id,
+  COUNT(*) AS count
+FROM film_category AS c
+  INNER JOIN film AS f
+ON f.film_id = c.film_id
+GROUP BY category_id
+```
+
+## Question 4: Incorporate table category into the answer to the previous question to find the name of the most popular category 
+
+```{sql, connection = con}
+SELECT c.category_id,
+  COUNT(*) AS count
+FROM film_category AS c
+  INNER JOIN (film AS f 
+ON f.film_id = c.film_id
+GROUP BY category_id
+```
