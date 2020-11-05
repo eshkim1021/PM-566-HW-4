@@ -147,8 +147,8 @@ GROUP BY rating
 ```{sql, connection = con}
 SELECT c.category_id,
   COUNT(*) AS count
-FROM film_category AS c
-  INNER JOIN film AS f
+FROM film AS f
+  INNER JOIN film_category AS c
 ON f.film_id = c.film_id
 GROUP BY category_id
 ```
@@ -156,10 +156,13 @@ GROUP BY category_id
 ## Question 4: Incorporate table category into the answer to the previous question to find the name of the most popular category 
 
 ```{sql, connection = con}
-SELECT c.category_id,
+SELECT c.category_id,name,
   COUNT(*) AS count
-FROM film_category AS c
-  INNER JOIN (film AS f 
-ON f.film_id = c.film_id
-GROUP BY category_id
+FROM film AS f
+  INNER JOIN film_category AS c ON f.film_id = c.film_id
+  JOIN category AS r ON c.category_id = r.category_id
+GROUP BY c.category_id
+ORDER BY count DESC
 ```
+
+The name of the most popular movie categories were ordered by popularity. The most popular category is sports, with a count of 74, while the least popular is music, with a count of 51. 

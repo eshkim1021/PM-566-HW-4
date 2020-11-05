@@ -57,9 +57,9 @@ microbenchmark::microbenchmark(
 ```
 
     ## Unit: relative
-    ##          expr      min       lq     mean   median      uq       max neval cld
-    ##     fun1(dat) 5.210412 7.512873 5.575314 7.624748 7.91334 0.5689932   100   b
-    ##  fun1alt(dat) 1.000000 1.000000 1.000000 1.000000 1.00000 1.0000000   100  a
+    ##          expr      min       lq     mean   median       uq       max neval cld
+    ##     fun1(dat) 5.227273 7.494405 5.743411 7.603175 7.883178 0.5559974   100   b
+    ##  fun1alt(dat) 1.000000 1.000000 1.000000 1.000000 1.000000 1.0000000   100  a
 
 ``` r
 # Test for the second
@@ -71,7 +71,7 @@ microbenchmark::microbenchmark(
 
     ## Unit: relative
     ##          expr      min       lq     mean   median       uq       max neval cld
-    ##     fun2(dat) 3.868006 3.746394 2.877186 3.656203 2.942313 0.8950274   100   b
+    ##     fun2(dat) 3.950463 3.766896 2.763292 3.480782 2.632573 0.9069997   100   b
     ##  fun2alt(dat) 1.000000 1.000000 1.000000 1.000000 1.000000 1.0000000   100  a
 
 After fun1 was altered to be more efficient, it was determined that the
@@ -109,7 +109,7 @@ system.time({
     ## [1] 3.14124
 
     ##    user  system elapsed 
-    ##    3.28    0.00    3.29
+    ##    3.75    0.03    3.78
 
 # SQL
 
@@ -237,4 +237,65 @@ GROUP BY rating
 
 ## Question 3: Use table film\_category together with film to find how many films there are with each category ID
 
+``` sql
+SELECT c.category_id,
+  COUNT(*) AS count
+FROM film AS f
+  INNER JOIN film_category AS c
+ON f.film_id = c.film_id
+GROUP BY category_id
+```
+
+<div class="knitsql-table">
+
+| category\_id | count |
+| :----------- | ----: |
+| 1            |    64 |
+| 2            |    66 |
+| 3            |    60 |
+| 4            |    57 |
+| 5            |    58 |
+| 6            |    68 |
+| 7            |    62 |
+| 8            |    69 |
+| 9            |    73 |
+| 10           |    61 |
+
+Displaying records 1 - 10
+
+</div>
+
 ## Question 4: Incorporate table category into the answer to the previous question to find the name of the most popular category
+
+``` sql
+SELECT c.category_id,name,
+  COUNT(*) AS count
+FROM film AS f
+  INNER JOIN film_category AS c ON f.film_id = c.film_id
+  JOIN category AS r ON c.category_id = r.category_id
+GROUP BY c.category_id
+ORDER BY count DESC
+```
+
+<div class="knitsql-table">
+
+| category\_id | name        | count |
+| -----------: | :---------- | ----: |
+|           15 | Sports      |    74 |
+|            9 | Foreign     |    73 |
+|            8 | Family      |    69 |
+|            6 | Documentary |    68 |
+|            2 | Animation   |    66 |
+|            1 | Action      |    64 |
+|           13 | New         |    63 |
+|            7 | Drama       |    62 |
+|           14 | Sci-Fi      |    61 |
+|           10 | Games       |    61 |
+
+Displaying records 1 - 10
+
+</div>
+
+The name of the most popular movie categories were ordered by
+popularity. The most popular category is sports, with a count of 74,
+while the least popular is music, with a count of 51.
