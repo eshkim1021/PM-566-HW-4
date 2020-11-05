@@ -58,7 +58,7 @@ microbenchmark::microbenchmark(
 
     ## Unit: relative
     ##          expr      min       lq     mean   median       uq       max neval cld
-    ##     fun1(dat) 5.227273 7.494405 5.743411 7.603175 7.883178 0.5559974   100   b
+    ##     fun1(dat) 5.240618 7.546778 5.718185 7.710041 8.081028 0.3641926   100   b
     ##  fun1alt(dat) 1.000000 1.000000 1.000000 1.000000 1.000000 1.0000000   100  a
 
 ``` r
@@ -70,9 +70,9 @@ microbenchmark::microbenchmark(
 ```
 
     ## Unit: relative
-    ##          expr      min       lq     mean   median       uq       max neval cld
-    ##     fun2(dat) 3.950463 3.766896 2.763292 3.480782 2.632573 0.9069997   100   b
-    ##  fun2alt(dat) 1.000000 1.000000 1.000000 1.000000 1.000000 1.0000000   100  a
+    ##          expr     min      lq     mean   median       uq       max neval cld
+    ##     fun2(dat) 4.06799 3.80867 2.796196 3.673319 2.878154 0.5882523   100   b
+    ##  fun2alt(dat) 1.00000 1.00000 1.000000 1.000000 1.000000 1.0000000   100  a
 
 After fun1 was altered to be more efficient, it was determined that the
 alternate fun1alt was overall faster in processing than the original
@@ -83,6 +83,8 @@ After fun2 was altered to be more efficient, it was determined that the
 alternate fun2alt was overall faster in processing than the origina
 function. On average, the fun2alt function was around 3.296 times faster
 than the original fun2 function.
+
+## Problem 2: Make things run faster with parallel computing
 
 ``` r
 sim_pi <- function(n = 1000, i = NULL) {
@@ -109,7 +111,28 @@ system.time({
     ## [1] 3.14124
 
     ##    user  system elapsed 
-    ##    3.75    0.03    3.78
+    ##    3.48    0.00    3.49
+
+``` r
+# YOUR CODE HERE
+system.time({
+  cl <- makePSOCKcluster(8L)
+  clusterSetRNGStream(cl,1231)
+  ans <- unlist(parLapply(cl,1:4000, sim_pi, n = 10000))
+  print(mean(ans))
+  stopCluster(cl)
+})
+```
+
+    ## [1] 3.141144
+
+    ##    user  system elapsed 
+    ##    0.03    0.08    1.91
+
+After initializing the parLapply() function to make the code run faster,
+it was found that utilizing parallel computing did decrease the time
+elapsed. With parallel computing, the process ran around 1.5 to 2 times
+faster than without parallel computing.
 
 # SQL
 
@@ -299,3 +322,7 @@ Displaying records 1 - 10
 The name of the most popular movie categories were ordered by
 popularity. The most popular category is sports, with a count of 74,
 while the least popular is music, with a count of 51.
+
+``` r
+dbDisconnect(con)
+```
